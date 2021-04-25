@@ -91,7 +91,7 @@ class Resident(models.Model):
     email = models.EmailField(unique=True, verbose_name="Email adhésion")
     # has_valid_membership = models.BooleanField(default=False,verbose_name="Possède une Adhésion valide (carte VA)")
 
-    rfid_uid = models.CharField(max_length=255, verbose_name="ID du badge RFID")
+    rfid_uid = models.CharField(unique=True, max_length=255, verbose_name="ID du badge RFID")
 
     washing_tokens_count = models.IntegerField(default=0, verbose_name="Nombre de jetons")
 
@@ -115,7 +115,7 @@ def use_machine(user: Resident, machine: WashingMachine, program: WashingProgram
     """
     with transaction.atomic():
         if (machine.available  # machine libre
-        ) and (user.washing_tokens_count > machine.cost  # il reste des jetons à la personne
+        ) and (user.washing_tokens_count >= machine.cost  # il reste des jetons à la personne
         ) and (machine.program_valid_for_machine(program)):  # le programe sélectionné est valide pour cette machine
 
             user.washing_tokens_count -= machine.cost  # on déduit le jeton du compte
@@ -132,6 +132,7 @@ def use_machine(user: Resident, machine: WashingMachine, program: WashingProgram
                 errors.append(11)
             if not machine.program_valid_for_machine(program):
                 errors.append(12)
+            print(errors)
             return False, machine, user, errors
 
     # noinspection PyUnreachableCode
