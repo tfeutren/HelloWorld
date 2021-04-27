@@ -30,9 +30,17 @@ On peut éditer la base de données avec l'admin Django, disponible à [http://l
 Il n'y a pas du tout d'authentification pour l'instant
 
 # fonctionnalités
+
 * décrémente le crédit de jetons lors d'un lavage
 * coût des machines configurable
 * les machines peuvent être désactivées depuis l'admin (si HS par exemple)
 * les programmes sont configurables depuis l'admin, avec une durée
 * le serveur affiche la date+heure à laquelle la machine sera disponible
 * endpoint de lancement de machine
+
+GUI Gtk sur un raspi avec NFC
+
+- lier une carte étudiante à un membre (pas forcément adhérent) -> créer un objet Resident sur ce serveur
+- rajouter (pas enlever) des jetons
+
+# interface admin dans le frontend admin Adhésion (nouvel page & permission spécifique)   

@@ -1,9 +1,12 @@
 from dataclasses import dataclass
 from typing import Tuple, List
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 # Create your models here.
 from django.utils.timezone import now
+
+from lavotomatic import settings
 
 
 class Building(models.Model):
@@ -93,11 +96,12 @@ class Resident(models.Model):
 
     rfid_uid = models.CharField(unique=True, max_length=255, verbose_name="ID du badge RFID")
 
-    washing_tokens_count = models.IntegerField(default=0, verbose_name="Nombre de jetons")
+    washing_tokens_count = models.IntegerField(default=0, verbose_name="Nombre de jetons", validators=[
+        MinValueValidator(0), MaxValueValidator(settings.MAX_WASHING_TOKENS_TOTAL),
+    ])
 
     def __str__(self):
         return f"#{self.adhesion_id} {self.email}"
-
 
 OPERATIONAL_STATUSES = {
     0: "La machine a été lancée",
@@ -113,28 +117,26 @@ def use_machine(user: Resident, machine: WashingMachine, program: WashingProgram
     """
     Le booléen renvoyé indique le succès de l'opération, et la liste des codes d'erreurs à la fin
     """
-    with transaction.atomic():
-        if (machine.available  # machine libre
-        ) and (user.washing_tokens_count >= machine.cost  # il reste des jetons à la personne
-        ) and (machine.program_valid_for_machine(program)):  # le programe sélectionné est valide pour cette machine
+    if (machine.available  # machine libre
+    ) and (user.washing_tokens_count >= machine.cost  # il reste des jetons à la personne
+    ) and (machine.program_valid_for_machine(program)):  # le programe sélectionné est valide pour cette machine
 
-            user.washing_tokens_count -= machine.cost  # on déduit le jeton du compte
-            machine.run_program(program)  # on prévoit l'heure de fin de cycle
+        user.washing_tokens_count -= machine.cost  # on déduit le jeton du compte
+        machine.run_program(program)  # on prévoit l'heure de fin de cycle
 
-            user.save()
-            machine.save()
-            return True, machine, user, []
-        else:
-            errors = []
-            if not machine.available:
-                errors.append(10)
-            if user.washing_tokens_count < machine.cost:
-                errors.append(11)
-            if not machine.program_valid_for_machine(program):
-                errors.append(12)
-            print(errors)
-            return False, machine, user, errors
+        user.save()
+        machine.save()
+        return True, machine, user, []
+    else:
+        errors = []
+        if not machine.available:
+            errors.append(10)
+        if user.washing_tokens_count < machine.cost:
+            errors.append(11)
+        if not machine.program_valid_for_machine(program):
+            errors.append(12)
 
+        return False, machine, user, errors
     # noinspection PyUnreachableCode
     return False, machine, user, [1]  # erreur inconnue
 

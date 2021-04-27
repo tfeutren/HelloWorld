@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 from api.models import *
 
@@ -22,7 +23,8 @@ class WashingMachineSerializer(serializers.ModelSerializer):
 class ResidentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resident
-        exclude=[]
+        exclude = []
+        read_only_fields = ['washing_tokens_count']
 
 class RunRequestSerializer(serializers.Serializer):
     resident = serializers.SlugRelatedField(many=False,
@@ -48,3 +50,7 @@ class RunResponseSerializer(serializers.Serializer):
     program = ProgramSerializer()
     errors = serializers.ListSerializer(child=serializers.IntegerField())
     details = serializers.ListSerializer(child=serializers.CharField())
+
+
+class AddWashingTokensSerializer(serializers.Serializer):
+    add_count = serializers.IntegerField(min_value=1, max_value=settings.MAX_WASHING_TOKENS_ADD)
