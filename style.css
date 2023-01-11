@@ -1,3 +1,11 @@
 h1 {
     color: red;
+    font-size: 10em;
+    font-weight: 900;
+    font-style: italic;
  }
+
+body{
+    background : linear-gradient(90deg,rgb(202, 235, 10),rgb(23, 200, 153)) ;
+    text-align: center;  
+}
