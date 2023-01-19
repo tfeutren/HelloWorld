@@ -5,6 +5,7 @@ git clone https://gitlab.com/sia-insa-lyon/BdEINSALyon/lavotomatic.git
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+test
 ./manage.py migrate
 ./manage.py init_demo_db
 ./manage.py createsuperuser
